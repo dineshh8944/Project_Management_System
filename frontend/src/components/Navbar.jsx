@@ -1,8 +1,8 @@
 import React, { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import { LogOut, User, FolderKanban } from 'lucide-react';
+import { LogOut, User, FolderKanban, LogIn, Eye } from 'lucide-react';
 
-const Navbar = ({ onToggleSidebar }) => {
+const Navbar = ({ onOpenAuth }) => {
   const { user, logout } = useContext(AuthContext);
 
   return (
@@ -10,7 +10,7 @@ const Navbar = ({ onToggleSidebar }) => {
       style={{
         height: '70px',
         borderBottom: '1px solid var(--border)',
-        background: 'rgba(15, 23, 42, 0.8)',
+        background: 'rgba(15, 23, 42, 0.85)',
         backdropFilter: 'blur(12px)',
         display: 'flex',
         alignItems: 'center',
@@ -21,6 +21,7 @@ const Navbar = ({ onToggleSidebar }) => {
         zIndex: 100
       }}
     >
+      {/* Brand Logo */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div
@@ -47,8 +48,9 @@ const Navbar = ({ onToggleSidebar }) => {
         </div>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-        {user && (
+      {/* Right Controls */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        {user ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div
               style={{
@@ -66,7 +68,7 @@ const Navbar = ({ onToggleSidebar }) => {
             >
               {user.full_name ? user.full_name.charAt(0).toUpperCase() : <User size={18} />}
             </div>
-            <div style={{ display: 'none', flexDirection: 'column', mdDisplay: 'flex' }}>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
               <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-main)' }}>
                 {user.full_name}
               </span>
@@ -80,6 +82,31 @@ const Navbar = ({ onToggleSidebar }) => {
             >
               <LogOut size={16} />
               <span>Logout</span>
+            </button>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span
+              style={{
+                fontSize: '0.8rem',
+                color: '#fbbf24',
+                background: 'rgba(245, 158, 11, 0.15)',
+                border: '1px solid rgba(245, 158, 11, 0.3)',
+                padding: '4px 10px',
+                borderRadius: '20px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                fontWeight: 600
+              }}
+            >
+              <Eye size={14} />
+              Guest Demo Access
+            </span>
+
+            <button onClick={onOpenAuth} className="btn btn-primary" style={{ padding: '8px 18px', fontSize: '0.85rem' }}>
+              <LogIn size={16} />
+              <span>Sign In / Register</span>
             </button>
           </div>
         )}

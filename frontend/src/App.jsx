@@ -16,6 +16,7 @@ import API from './services/api';
 const AppContent = () => {
   const { user, loading } = useContext(AuthContext);
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   // Modals state
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
@@ -36,8 +37,9 @@ const AppContent = () => {
     }, 4000);
   };
 
-  // Fetch projects list for task modal creation
+  // Fetch projects list for task modal creation (when logged in)
   const fetchUserProjects = async () => {
+    if (!user) return;
     try {
       const res = await API.get('/projects');
       if (res.data.success) {
@@ -50,17 +52,26 @@ const AppContent = () => {
 
   useEffect(() => {
     if (user) {
+      setIsAuthModalOpen(false);
       fetchUserProjects();
     }
   }, [user, activeTab, isProjectModalOpen, isTaskModalOpen]);
 
   // Project modal handlers
   const handleOpenProjectCreate = () => {
+    if (!user) {
+      setIsAuthModalOpen(true);
+      return;
+    }
     setEditingProject(null);
     setIsProjectModalOpen(true);
   };
 
   const handleOpenProjectEdit = (project) => {
+    if (!user) {
+      setIsAuthModalOpen(true);
+      return;
+    }
     setEditingProject(project);
     setIsProjectModalOpen(true);
   };
@@ -82,11 +93,19 @@ const AppContent = () => {
 
   // Task modal handlers
   const handleOpenTaskCreate = () => {
+    if (!user) {
+      setIsAuthModalOpen(true);
+      return;
+    }
     setEditingTask(null);
     setIsTaskModalOpen(true);
   };
 
   const handleOpenTaskEdit = (task) => {
+    if (!user) {
+      setIsAuthModalOpen(true);
+      return;
+    }
     setEditingTask(task);
     setIsTaskModalOpen(true);
   };
@@ -124,13 +143,16 @@ const AppContent = () => {
     );
   }
 
-  if (!user) {
-    return <AuthPage />;
+  // If unauthenticated and Auth Modal is requested:
+  if (!user && isAuthModalOpen) {
+    return <AuthPage onBack={() => setIsAuthModalOpen(false)} />;
   }
+
+  const isGuest = !user;
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#0f172a' }}>
-      <Navbar />
+      <Navbar onOpenAuth={() => setIsAuthModalOpen(true)} />
 
       <div style={{ display: 'flex', flex: 1 }}>
         <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
@@ -138,46 +160,56 @@ const AppContent = () => {
         <main style={{ flex: 1, minWidth: 0, overflowY: 'auto' }}>
           {activeTab === 'dashboard' && (
             <Dashboard
+              isGuest={isGuest}
               onNavigate={setActiveTab}
               onOpenProjectModal={handleOpenProjectCreate}
               onOpenTaskModal={handleOpenTaskCreate}
+              onOpenAuth={() => setIsAuthModalOpen(true)}
             />
           )}
 
           {activeTab === 'projects' && (
             <ProjectsPage
+              isGuest={isGuest}
               onOpenCreateModal={handleOpenProjectCreate}
               onEditProject={handleOpenProjectEdit}
               showToast={showToast}
+              onOpenAuth={() => setIsAuthModalOpen(true)}
             />
           )}
 
           {activeTab === 'tasks' && (
             <TasksPage
+              isGuest={isGuest}
               onOpenCreateModal={handleOpenTaskCreate}
               onEditTask={handleOpenTaskEdit}
               showToast={showToast}
+              onOpenAuth={() => setIsAuthModalOpen(true)}
             />
           )}
         </main>
       </div>
 
       {/* Project Creation/Editing Modal */}
-      <ProjectModal
-        isOpen={isProjectModalOpen}
-        onClose={() => setIsProjectModalOpen(false)}
-        onSave={handleSaveProject}
-        project={editingProject}
-      />
+      {user && (
+        <ProjectModal
+          isOpen={isProjectModalOpen}
+          onClose={() => setIsProjectModalOpen(false)}
+          onSave={handleSaveProject}
+          project={editingProject}
+        />
+      )}
 
       {/* Task Creation/Editing Modal */}
-      <TaskModal
-        isOpen={isTaskModalOpen}
-        onClose={() => setIsTaskModalOpen(false)}
-        onSave={handleSaveTask}
-        task={editingTask}
-        projects={projectsList}
-      />
+      {user && (
+        <TaskModal
+          isOpen={isTaskModalOpen}
+          onClose={() => setIsTaskModalOpen(false)}
+          onSave={handleSaveTask}
+          task={editingTask}
+          projects={projectsList}
+        />
+      )}
 
       {/* Toast Alert */}
       <Toast

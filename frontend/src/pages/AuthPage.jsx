@@ -2,9 +2,9 @@ import React, { useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { FolderKanban, Lock, Mail, User, ArrowRight, CheckCircle } from 'lucide-react';
 
-const AuthPage = () => {
+const AuthPage = ({ onBack, defaultIsLogin = true }) => {
   const { login, register } = useContext(AuthContext);
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLogin, setIsLogin] = useState(defaultIsLogin);
   const [formData, setFormData] = useState({
     full_name: '',
     email: '',
@@ -67,6 +67,23 @@ const AuthPage = () => {
           boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5)'
         }}
       >
+        {onBack && (
+          <button
+            onClick={onBack}
+            className="btn btn-secondary"
+            style={{
+              marginBottom: '20px',
+              padding: '6px 14px',
+              fontSize: '0.82rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            ← Back to About Page
+          </button>
+        )}
+
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <div
             style={{

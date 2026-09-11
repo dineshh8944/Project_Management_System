@@ -69,7 +69,9 @@ project management/
 
 ## Environment Variables Documentation
 
-The backend relies on the `.env` file located at `backend/.env`. A template is provided in `backend/.env.example`.
+### Backend Environment Variables (`backend/.env`)
+
+A template is provided in [backend/.env.example](file:///d:/youtube%20and%20practice/project_Managements/project%20management/backend/.env.example).
 
 | Variable | Default Value | Description |
 | :--- | :--- | :--- |
@@ -81,6 +83,14 @@ The backend relies on the `.env` file located at `backend/.env`. A template is p
 | `DB_PORT` | `3306` | MySQL port |
 | `JWT_SECRET` | `super_secret_jwt_key_project_management_2026` | Secret key for signing JWT tokens |
 | `JWT_EXPIRES_IN` | `7d` | Token validity duration |
+
+### Frontend Environment Variables (`frontend/.env`)
+
+A template is provided in [frontend/.env.example](file:///d:/youtube%20and%20practice/project_Managements/project%20management/frontend/.env.example).
+
+| Variable | Default Value | Description |
+| :--- | :--- | :--- |
+| `VITE_API_BASE_URL` | `http://localhost:5000/api` | Backend REST API base URL |
 
 ---
 

@@ -1,8 +1,8 @@
 import React, { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import { LogOut, User, FolderKanban, LogIn, Eye } from 'lucide-react';
+import { LogOut, User, FolderKanban } from 'lucide-react';
 
-const Navbar = ({ onOpenAuth }) => {
+const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
 
   return (
@@ -50,7 +50,7 @@ const Navbar = ({ onOpenAuth }) => {
 
       {/* Right Controls */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-        {user ? (
+        {user && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div
               style={{
@@ -82,31 +82,6 @@ const Navbar = ({ onOpenAuth }) => {
             >
               <LogOut size={16} />
               <span>Logout</span>
-            </button>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span
-              style={{
-                fontSize: '0.8rem',
-                color: '#fbbf24',
-                background: 'rgba(245, 158, 11, 0.15)',
-                border: '1px solid rgba(245, 158, 11, 0.3)',
-                padding: '4px 10px',
-                borderRadius: '20px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                fontWeight: 600
-              }}
-            >
-              <Eye size={14} />
-              Guest Demo Access
-            </span>
-
-            <button onClick={onOpenAuth} className="btn btn-primary" style={{ padding: '8px 18px', fontSize: '0.85rem' }}>
-              <LogIn size={16} />
-              <span>Sign In / Register</span>
             </button>
           </div>
         )}

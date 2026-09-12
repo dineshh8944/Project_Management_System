@@ -7,59 +7,25 @@ import {
   PlayCircle,
   Plus,
   ArrowRight,
-  Activity,
-  LogIn
+  Activity
 } from 'lucide-react';
 
-const Dashboard = ({ isGuest, onNavigate, onOpenProjectModal, onOpenTaskModal, onOpenAuth }) => {
+const Dashboard = ({ onNavigate, onOpenProjectModal, onOpenTaskModal }) => {
   const [stats, setStats] = useState({
-    total_projects: 3,
-    in_progress_projects: 1,
-    completed_projects: 1,
-    not_started_projects: 1,
-    total_tasks: 4,
-    completed_tasks: 2,
-    pending_tasks: 1,
-    in_progress_tasks: 1
+    total_projects: 0,
+    in_progress_projects: 0,
+    completed_projects: 0,
+    not_started_projects: 0,
+    total_tasks: 0,
+    completed_tasks: 0,
+    pending_tasks: 0,
+    in_progress_tasks: 0
   });
 
-  const [recentProjects, setRecentProjects] = useState([
-    {
-      id: 'demo-1',
-      name: 'E-Commerce Platform Redesign',
-      description: 'Modernizing storefront UI with React and Stripe checkout.',
-      status: 'In Progress',
-      start_date: '2026-09-01',
-      end_date: '2026-10-15',
-      total_tasks: 4,
-      completed_tasks: 2
-    },
-    {
-      id: 'demo-2',
-      name: 'Mobile Banking App API Integration',
-      description: 'Secure REST API endpoints with JWT authentication & rate limiting.',
-      status: 'Completed',
-      start_date: '2026-08-10',
-      end_date: '2026-09-05',
-      total_tasks: 3,
-      completed_tasks: 3
-    },
-    {
-      id: 'demo-3',
-      name: 'AI Analytics Dashboard',
-      description: 'Real-time metrics charts, exportable PDF reports, and automated insights.',
-      status: 'Not Started',
-      start_date: '2026-10-01',
-      end_date: '2026-11-30',
-      total_tasks: 3,
-      completed_tasks: 0
-    }
-  ]);
-
-  const [loading, setLoading] = useState(!isGuest);
+  const [recentProjects, setRecentProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const fetchDashboardData = async () => {
-    if (isGuest) return;
     try {
       setLoading(true);
       const res = await API.get('/projects/stats/dashboard');
@@ -76,7 +42,7 @@ const Dashboard = ({ isGuest, onNavigate, onOpenProjectModal, onOpenTaskModal, o
 
   useEffect(() => {
     fetchDashboardData();
-  }, [isGuest]);
+  }, []);
 
   const taskCompletionRate = stats.total_tasks > 0
     ? Math.round((stats.completed_tasks / stats.total_tasks) * 100)
@@ -84,35 +50,6 @@ const Dashboard = ({ isGuest, onNavigate, onOpenProjectModal, onOpenTaskModal, o
 
   return (
     <div className="animate-fade-in" style={{ padding: '32px' }}>
-      {/* Guest Mode Banner */}
-      {isGuest && (
-        <div
-          style={{
-            background: 'linear-gradient(90deg, rgba(99, 102, 241, 0.2) 0%, rgba(168, 85, 247, 0.2) 100%)',
-            border: '1px solid rgba(99, 102, 241, 0.4)',
-            borderRadius: '12px',
-            padding: '14px 20px',
-            marginBottom: '28px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '12px'
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ fontSize: '1.2rem' }}>💡</span>
-            <span style={{ fontSize: '0.9rem', color: '#f8fafc', fontWeight: 500 }}>
-              You are exploring in <strong>Guest Preview Mode</strong>. Sign in to create, save, and manage your custom projects and tasks!
-            </span>
-          </div>
-          <button onClick={onOpenAuth} className="btn btn-primary" style={{ padding: '6px 16px', fontSize: '0.85rem' }}>
-            <LogIn size={15} />
-            <span>Sign In Now</span>
-          </button>
-        </div>
-      )}
-
       {/* Header Banner */}
       <div
         style={{
@@ -131,11 +68,11 @@ const Dashboard = ({ isGuest, onNavigate, onOpenProjectModal, onOpenTaskModal, o
           </p>
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
-          <button onClick={isGuest ? onOpenAuth : onOpenProjectModal} className="btn btn-secondary">
+          <button onClick={onOpenProjectModal} className="btn btn-secondary">
             <Plus size={18} />
             <span>New Project</span>
           </button>
-          <button onClick={isGuest ? onOpenAuth : onOpenTaskModal} className="btn btn-primary">
+          <button onClick={onOpenTaskModal} className="btn btn-primary">
             <Plus size={18} />
             <span>New Task</span>
           </button>
@@ -163,7 +100,7 @@ const Dashboard = ({ isGuest, onNavigate, onOpenProjectModal, onOpenTaskModal, o
           </div>
           <div style={{ fontSize: '2rem', fontWeight: 800, color: '#fff' }}>{stats.total_projects}</div>
           <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-            {isGuest ? 'Sample Projects' : 'Projects owned by you'}
+            Projects owned by you
           </div>
         </div>
 
@@ -266,36 +203,44 @@ const Dashboard = ({ isGuest, onNavigate, onOpenProjectModal, onOpenTaskModal, o
               </tr>
             </thead>
             <tbody>
-              {recentProjects.map((p) => {
-                const projectProgress = p.total_tasks > 0
-                  ? Math.round((p.completed_tasks / p.total_tasks) * 100)
-                  : 0;
+              {recentProjects.length === 0 ? (
+                <tr>
+                  <td colSpan="5" style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                    {loading ? 'Loading projects...' : 'No projects found. Create a new project to get started!'}
+                  </td>
+                </tr>
+              ) : (
+                recentProjects.map((p) => {
+                  const projectProgress = p.total_tasks > 0
+                    ? Math.round((p.completed_tasks / p.total_tasks) * 100)
+                    : 0;
 
-                return (
-                  <tr key={p.id} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.04)' }}>
-                    <td style={{ padding: '16px', fontWeight: 600, color: '#fff' }}>{p.name}</td>
-                    <td style={{ padding: '16px' }}>
-                      <span
-                        className={`badge badge-${
-                          p.status === 'Not Started' ? 'not-started' : p.status === 'In Progress' ? 'in-progress' : 'completed'
-                        }`}
-                      >
-                        {p.status}
-                      </span>
-                    </td>
-                    <td style={{ padding: '16px', width: '200px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div className="progress-bar-bg" style={{ flex: 1 }}>
-                          <div className="progress-bar-fill" style={{ width: `${projectProgress}%` }}></div>
+                  return (
+                    <tr key={p.id} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.04)' }}>
+                      <td style={{ padding: '16px', fontWeight: 600, color: '#fff' }}>{p.name}</td>
+                      <td style={{ padding: '16px' }}>
+                        <span
+                          className={`badge badge-${
+                            p.status === 'Not Started' ? 'not-started' : p.status === 'In Progress' ? 'in-progress' : 'completed'
+                          }`}
+                        >
+                          {p.status}
+                        </span>
+                      </td>
+                      <td style={{ padding: '16px', width: '200px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <div className="progress-bar-bg" style={{ flex: 1 }}>
+                            <div className="progress-bar-fill" style={{ width: `${projectProgress}%` }}></div>
+                          </div>
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{projectProgress}%</span>
                         </div>
-                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{projectProgress}%</span>
-                      </div>
-                    </td>
-                    <td style={{ padding: '16px', color: 'var(--text-muted)' }}>{p.start_date || 'N/A'}</td>
-                    <td style={{ padding: '16px', color: 'var(--text-muted)' }}>{p.end_date || 'N/A'}</td>
-                  </tr>
-                );
-              })}
+                      </td>
+                      <td style={{ padding: '16px', color: 'var(--text-muted)' }}>{p.start_date || 'N/A'}</td>
+                      <td style={{ padding: '16px', color: 'var(--text-muted)' }}>{p.end_date || 'N/A'}</td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>

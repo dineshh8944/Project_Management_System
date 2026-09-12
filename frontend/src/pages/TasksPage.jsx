@@ -8,73 +8,19 @@ import {
   Edit2,
   Trash2,
   AlertCircle,
-  FolderKanban,
-  LogIn
+  FolderKanban
 } from 'lucide-react';
 
-const INITIAL_DEMO_PROJECTS = [
-  { id: 'demo-1', name: 'E-Commerce Platform Redesign' },
-  { id: 'demo-2', name: 'Mobile Banking App API Integration' },
-  { id: 'demo-3', name: 'AI Analytics Dashboard' }
-];
-
-const INITIAL_DEMO_TASKS = [
-  {
-    id: 'task-1',
-    project_id: 'demo-1',
-    project_name: 'E-Commerce Platform Redesign',
-    name: 'Design responsive checkout page wireframes',
-    description: 'Ensure mobile-first layout and clear cart item summaries.',
-    priority: 'High',
-    status: 'Completed',
-    due_date: '2026-09-10'
-  },
-  {
-    id: 'task-2',
-    project_id: 'demo-1',
-    project_name: 'E-Commerce Platform Redesign',
-    name: 'Integrate Stripe payment gateway API',
-    description: 'Implement webhooks for payment verification.',
-    priority: 'High',
-    status: 'In Progress',
-    due_date: '2026-09-20'
-  },
-  {
-    id: 'task-3',
-    project_id: 'demo-2',
-    project_name: 'Mobile Banking App API Integration',
-    name: 'Setup JWT authentication & rate limiter',
-    description: 'Enforce bearer tokens on protected endpoints.',
-    priority: 'Medium',
-    status: 'Completed',
-    due_date: '2026-08-25'
-  },
-  {
-    id: 'task-4',
-    project_id: 'demo-3',
-    project_name: 'AI Analytics Dashboard',
-    name: 'Build chart components & export triggers',
-    description: 'Use SVG charting libraries for interactive metric widgets.',
-    priority: 'Low',
-    status: 'Pending',
-    due_date: '2026-10-10'
-  }
-];
-
-const TasksPage = ({ isGuest, onOpenCreateModal, onEditTask, showToast, onOpenAuth }) => {
-  const [tasks, setTasks] = useState(isGuest ? INITIAL_DEMO_TASKS : []);
-  const [projects, setProjects] = useState(isGuest ? INITIAL_DEMO_PROJECTS : []);
-  const [loading, setLoading] = useState(!isGuest);
+const TasksPage = ({ onOpenCreateModal, onEditTask, showToast }) => {
+  const [tasks, setTasks] = useState([]);
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [projectFilter, setProjectFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [priorityFilter, setPriorityFilter] = useState('');
 
   const fetchProjects = async () => {
-    if (isGuest) {
-      setProjects(INITIAL_DEMO_PROJECTS);
-      return;
-    }
     try {
       const res = await API.get('/projects');
       if (res.data.success) {
@@ -86,24 +32,6 @@ const TasksPage = ({ isGuest, onOpenCreateModal, onEditTask, showToast, onOpenAu
   };
 
   const fetchTasks = async () => {
-    if (isGuest) {
-      let filtered = INITIAL_DEMO_TASKS;
-      if (search) {
-        filtered = filtered.filter(t => t.name.toLowerCase().includes(search.toLowerCase()));
-      }
-      if (projectFilter) {
-        filtered = filtered.filter(t => String(t.project_id) === String(projectFilter));
-      }
-      if (statusFilter) {
-        filtered = filtered.filter(t => t.status === statusFilter);
-      }
-      if (priorityFilter) {
-        filtered = filtered.filter(t => t.priority === priorityFilter);
-      }
-      setTasks(filtered);
-      return;
-    }
-
     try {
       setLoading(true);
       const params = {};
@@ -125,17 +53,13 @@ const TasksPage = ({ isGuest, onOpenCreateModal, onEditTask, showToast, onOpenAu
 
   useEffect(() => {
     fetchProjects();
-  }, [isGuest]);
+  }, []);
 
   useEffect(() => {
     fetchTasks();
-  }, [search, projectFilter, statusFilter, priorityFilter, isGuest]);
+  }, [search, projectFilter, statusFilter, priorityFilter]);
 
   const handleToggleStatus = async (task) => {
-    if (isGuest) {
-      onOpenAuth();
-      return;
-    }
     const nextStatus = task.status === 'Completed' ? 'Pending' : 'Completed';
     try {
       const res = await API.patch(`/tasks/${task.id}/status`, { status: nextStatus });
@@ -149,10 +73,6 @@ const TasksPage = ({ isGuest, onOpenCreateModal, onEditTask, showToast, onOpenAu
   };
 
   const handleDelete = async (id, name) => {
-    if (isGuest) {
-      onOpenAuth();
-      return;
-    }
     if (!window.confirm(`Are you sure you want to delete task "${name}"?`)) {
       return;
     }
@@ -169,35 +89,6 @@ const TasksPage = ({ isGuest, onOpenCreateModal, onEditTask, showToast, onOpenAu
 
   return (
     <div className="animate-fade-in" style={{ padding: '32px' }}>
-      {/* Guest Banner */}
-      {isGuest && (
-        <div
-          style={{
-            background: 'linear-gradient(90deg, rgba(99, 102, 241, 0.2) 0%, rgba(168, 85, 247, 0.2) 100%)',
-            border: '1px solid rgba(99, 102, 241, 0.4)',
-            borderRadius: '12px',
-            padding: '14px 20px',
-            marginBottom: '28px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '12px'
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ fontSize: '1.2rem' }}>💡</span>
-            <span style={{ fontSize: '0.9rem', color: '#f8fafc', fontWeight: 500 }}>
-              Viewing sample tasks in <strong>Guest Mode</strong>. Sign in to manage your tasks.
-            </span>
-          </div>
-          <button onClick={onOpenAuth} className="btn btn-primary" style={{ padding: '6px 16px', fontSize: '0.85rem' }}>
-            <LogIn size={15} />
-            <span>Sign In</span>
-          </button>
-        </div>
-      )}
-
       {/* Header & Controls */}
       <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
         <div>
@@ -206,7 +97,7 @@ const TasksPage = ({ isGuest, onOpenCreateModal, onEditTask, showToast, onOpenAu
             Filter, manage, and complete action items across your projects
           </p>
         </div>
-        <button onClick={isGuest ? onOpenAuth : onOpenCreateModal} className="btn btn-primary">
+        <button onClick={onOpenCreateModal} className="btn btn-primary">
           <Plus size={18} />
           <span>Create Task</span>
         </button>
@@ -301,7 +192,7 @@ const TasksPage = ({ isGuest, onOpenCreateModal, onEditTask, showToast, onOpenAu
               ? 'No tasks matched your search or filter parameters.'
               : 'Create your first task to start organizing work.'}
           </p>
-          <button onClick={isGuest ? onOpenAuth : onOpenCreateModal} className="btn btn-primary">
+          <button onClick={onOpenCreateModal} className="btn btn-primary">
             <Plus size={18} />
             <span>Create New Task</span>
           </button>
@@ -404,7 +295,7 @@ const TasksPage = ({ isGuest, onOpenCreateModal, onEditTask, showToast, onOpenAu
                     {/* Actions */}
                     <td style={{ padding: '16px 20px', textAlign: 'right' }}>
                       <div style={{ display: 'inline-flex', gap: '6px' }}>
-                        <button onClick={() => (isGuest ? onOpenAuth() : onEditTask(t))} className="btn-icon" title="Edit Task">
+                        <button onClick={() => onEditTask(t)} className="btn-icon" title="Edit Task">
                           <Edit2 size={16} />
                         </button>
                         <button onClick={() => handleDelete(t.id, t.name)} className="btn-icon" title="Delete Task">

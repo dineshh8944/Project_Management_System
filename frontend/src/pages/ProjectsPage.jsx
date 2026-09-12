@@ -8,63 +8,16 @@ import {
   Edit2,
   Trash2,
   Calendar,
-  Clock,
-  LogIn
+  Clock
 } from 'lucide-react';
 
-const INITIAL_DEMO_PROJECTS = [
-  {
-    id: 'demo-1',
-    name: 'E-Commerce Platform Redesign',
-    description: 'Modernizing storefront UI with React, Tailwind CSS, and Stripe payment checkout.',
-    status: 'In Progress',
-    start_date: '2026-09-01',
-    end_date: '2026-10-15',
-    total_tasks: 4,
-    completed_tasks: 2
-  },
-  {
-    id: 'demo-2',
-    name: 'Mobile Banking App API Integration',
-    description: 'Secure REST API endpoints with JWT authentication, bcrypt password hashing, and rate limiting.',
-    status: 'Completed',
-    start_date: '2026-08-10',
-    end_date: '2026-09-05',
-    total_tasks: 3,
-    completed_tasks: 3
-  },
-  {
-    id: 'demo-3',
-    name: 'AI Analytics Dashboard',
-    description: 'Real-time metrics charts, exportable PDF reports, and automated predictive insights.',
-    status: 'Not Started',
-    start_date: '2026-10-01',
-    end_date: '2026-11-30',
-    total_tasks: 3,
-    completed_tasks: 0
-  }
-];
-
-const ProjectsPage = ({ isGuest, onOpenCreateModal, onEditProject, showToast, onOpenAuth }) => {
-  const [projects, setProjects] = useState(isGuest ? INITIAL_DEMO_PROJECTS : []);
-  const [loading, setLoading] = useState(!isGuest);
+const ProjectsPage = ({ onOpenCreateModal, onEditProject, showToast }) => {
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
   const fetchProjects = async () => {
-    if (isGuest) {
-      // Filter local demo projects
-      let filtered = INITIAL_DEMO_PROJECTS;
-      if (search) {
-        filtered = filtered.filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
-      }
-      if (statusFilter) {
-        filtered = filtered.filter(p => p.status === statusFilter);
-      }
-      setProjects(filtered);
-      return;
-    }
-
     try {
       setLoading(true);
       const params = {};
@@ -84,13 +37,9 @@ const ProjectsPage = ({ isGuest, onOpenCreateModal, onEditProject, showToast, on
 
   useEffect(() => {
     fetchProjects();
-  }, [search, statusFilter, isGuest]);
+  }, [search, statusFilter]);
 
   const handleDelete = async (id, name) => {
-    if (isGuest) {
-      onOpenAuth();
-      return;
-    }
     if (!window.confirm(`Are you sure you want to delete project "${name}"? This action cannot be undone.`)) {
       return;
     }
@@ -107,35 +56,6 @@ const ProjectsPage = ({ isGuest, onOpenCreateModal, onEditProject, showToast, on
 
   return (
     <div className="animate-fade-in" style={{ padding: '32px' }}>
-      {/* Guest Banner */}
-      {isGuest && (
-        <div
-          style={{
-            background: 'linear-gradient(90deg, rgba(99, 102, 241, 0.2) 0%, rgba(168, 85, 247, 0.2) 100%)',
-            border: '1px solid rgba(99, 102, 241, 0.4)',
-            borderRadius: '12px',
-            padding: '14px 20px',
-            marginBottom: '28px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '12px'
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ fontSize: '1.2rem' }}>💡</span>
-            <span style={{ fontSize: '0.9rem', color: '#f8fafc', fontWeight: 500 }}>
-              Viewing sample projects in <strong>Guest Mode</strong>. Sign in to create, edit, or delete live projects.
-            </span>
-          </div>
-          <button onClick={onOpenAuth} className="btn btn-primary" style={{ padding: '6px 16px', fontSize: '0.85rem' }}>
-            <LogIn size={15} />
-            <span>Sign In</span>
-          </button>
-        </div>
-      )}
-
       {/* Header & Controls Toolbar */}
       <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
         <div>
@@ -144,7 +64,7 @@ const ProjectsPage = ({ isGuest, onOpenCreateModal, onEditProject, showToast, on
             Create and organize project workspaces
           </p>
         </div>
-        <button onClick={isGuest ? onOpenAuth : onOpenCreateModal} className="btn btn-primary">
+        <button onClick={onOpenCreateModal} className="btn btn-primary">
           <Plus size={18} />
           <span>Create Project</span>
         </button>
@@ -204,7 +124,7 @@ const ProjectsPage = ({ isGuest, onOpenCreateModal, onEditProject, showToast, on
           <p style={{ color: 'var(--text-muted)', marginBottom: '20px' }}>
             {search || statusFilter ? 'Try clearing your search or status filter criteria.' : 'Get started by creating your first project!'}
           </p>
-          <button onClick={isGuest ? onOpenAuth : onOpenCreateModal} className="btn btn-primary">
+          <button onClick={onOpenCreateModal} className="btn btn-primary">
             <Plus size={18} />
             <span>Create New Project</span>
           </button>
@@ -246,7 +166,7 @@ const ProjectsPage = ({ isGuest, onOpenCreateModal, onEditProject, showToast, on
                     </span>
 
                     <div style={{ display: 'flex', gap: '6px' }}>
-                      <button onClick={() => (isGuest ? onOpenAuth() : onEditProject(p))} className="btn-icon" title="Edit Project">
+                      <button onClick={() => onEditProject(p)} className="btn-icon" title="Edit Project">
                         <Edit2 size={16} />
                       </button>
                       <button onClick={() => handleDelete(p.id, p.name)} className="btn-icon" title="Delete Project">
